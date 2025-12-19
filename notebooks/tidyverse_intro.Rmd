@@ -1,27 +1,84 @@
-## Introduction to the Tidyverse: An Exploration of UN Data 
+---
+title: "Tidyverse Introduction"
+output: html_notebook
+---
+
+# Introduction to the Tidyverse: An Exploration of UN Data
+
 In this project, you'll be redoing the UN Data project using the tidyverse libraries. You have been provided three csv files, gdp_per_capita.csv, life_expectancy.csv, and continents.csv.
 
 Create a new R Notebook to complete this exercise.
 
-1.	Using the `read_csv()` function, read the GDP dataset into your notebook as a tibble called `gdp_df`. After reading it in, inspect the first 10 rows and then inspect the last 10 rows. 
+```{r}
+library(tidyverse)
+```
 
-2. Drop the 'Value Footnotes' column, and rename the remaining columns to 'Country', 'Year', and 'GDP_Per_Capita'.
+## 1. Using the `read_csv()` function, read the GDP dataset into your notebook as a tibble called `gdp_df`.
 
-3. Which years are represented in this dataset? How many observations are there per year? Make a plot to view the number of observations per year.
+After reading it in, inspect the first 10 rows and then inspect the last 10 rows.
 
-4. How many countries are represented in this dataset? Which countries have the fewest observations?
+*New code cell: CTRL + ALT + I*\
+*Assignment: ALT + minus(-)*\
+*Pipe: CTRL + SHIFT + M*
 
-5. Create a new tibble by subsetting `gdp_df` to just the year 2021. Call this new tibble `gdp_2021`.
+```{r}
+# Read data
+gdp_df <- read_csv("../data/gdp_per_capita.csv")
+```
 
-6. Use `summary()` to find the summary statistics for GDP per capita in 2021. 
+```{r}
+# Display the top 10 rows
+gdp_df |>
+  head(10)
+```
 
-7. Create a histogram of GDP Per Capita numbers for 2021 (you may wish to adjust the number of bins for your histogram).
+```{r}
+# Display the bottom 10 rows
+gdp_df |>
+  tail(10)
+```
 
-8. Find the top 5 counties and bottom 5 countries by GDP per capita in 2021.
+## 2. Drop the 'Value Footnotes' column, and rename the remaining columns to 'Country', 'Year', and 'GDP_Per_Capita'.
 
-9. Now, return to the full dataset, `gdp_df`. Pivot the data for 1990 and 2021 (using `pivot_wider()` function) so that each row corresponds to a country, each column corresponds to a year, and the values in the table give the GDP_Per_Capita amount. Drop any rows that are missing values for either 1990 or 2021. Save the result to a tibble named `gdp_pivoted`.
+```{r}
+gdp_df <- gdp_df |> 
+  select(!'Value Footnotes') |> 
+  rename(Country=`Country or Area`, GDP_Per_Capita=Value)
 
-10. Create a new column in `gdp_pivoted` named `Percent_Change`. This column should contain the percent change in GDP_Per_Capita from 1990 to 2021. Hint: Percent change is calculated as 100*(New Value - Old Value) / Old Value.
+gdp_df |> 
+  head(1)
+```
+
+## 3. Which years are represented in this dataset?
+
+How many observations are there per year? Make a plot to view the number of observations per year.
+
+```{r}
+# Display unique years
+gdp_df |> 
+  distinct(Year) |> 
+  arrange(Year)
+```
+
+```{r}
+gdp_df |> 
+  group_by(Year)
+```
+
+
+## 4. How many countries are represented in this dataset? Which countries have the fewest observations?
+
+5.  Create a new tibble by subsetting `gdp_df` to just the year 2021. Call this new tibble `gdp_2021`.
+
+6.  Use `summary()` to find the summary statistics for GDP per capita in 2021.
+
+7.  Create a histogram of GDP Per Capita numbers for 2021 (you may wish to adjust the number of bins for your histogram).
+
+8.  Find the top 5 counties and bottom 5 countries by GDP per capita in 2021.
+
+9.  Now, return to the full dataset, `gdp_df`. Pivot the data for 1990 and 2021 (using `pivot_wider()` function) so that each row corresponds to a country, each column corresponds to a year, and the values in the table give the GDP_Per_Capita amount. Drop any rows that are missing values for either 1990 or 2021. Save the result to a tibble named `gdp_pivoted`.
+
+10. Create a new column in `gdp_pivoted` named `Percent_Change`. This column should contain the percent change in GDP_Per_Capita from 1990 to 2021. Hint: Percent change is calculated as 100\*(New Value - Old Value) / Old Value.
 
 11. How many countries experienced a negative percent change in GDP per capita from 1990 to 2021?
 
@@ -35,8 +92,8 @@ Create a new R Notebook to complete this exercise.
 
 16. Create a boxplot showing GDP per capita in 2021 split out by continent. What do you notice?
 
-17. Read life_expectancy.csv into a tibble named life_expectancy. Do not modify the csv file in order to read this data in. 
- 
+17. Read life_expectancy.csv into a tibble named life_expectancy. Do not modify the csv file in order to read this data in.
+
 18. Drop the Country Code, Indicator Name, and Indicator Code columns. Then use `pivot_longer` to convert your data from wide to long. That is, instead of having one row per country and multiple colums per year, we want to have multiple rows per country and a single column for year. After melting, rename the columns to `Country`, `Year`, and `Life_Expectancy`.
 
 19. What was the first country with a life expectancy to exceed 80?
