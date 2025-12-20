@@ -31,9 +31,7 @@ gdp_df <- read_csv("../data/gdp_per_capita.csv")
 # Display the top 10 rows
 gdp_df |>
   head(10)
-```
 
-```{r}
 # Display the bottom 10 rows
 gdp_df |>
   tail(10)
@@ -48,7 +46,7 @@ gdp_df <- gdp_df |>
 
 # Display the formatted table
 gdp_df |> 
-  head(1)
+  slice_sample(n=2)
 ```
 
 ## 3. Which years are represented in this dataset?
@@ -93,11 +91,11 @@ total_countries # Display the total country count
 ```
 
 ```{r}
-
+# Get the bottom 10% of countries
 gdp_df |> 
   group_by(Country) |> # Group by the countries
   summarize(Observations=n() / total_countries) |> # Convert the country count to a percentage
-  filter(Observations <= 0.1) # Filter by the bottom 10% of observation counts
+  filter(Observations <= 0.1) # Filter observation counts that are less than 10%
 ```
 
 ## 5.  Create a new tibble by subsetting `gdp_df` to just the year 2021. Call this new tibble `gdp_2021`.
@@ -109,7 +107,7 @@ gdp_2021 <- gdp_df |>
 
 # Display the new tibble
 gdp_2021 |> 
-  head(1)
+  slice_sample(n=2)
 ```
 
 ## 6.  Use `summary()` to find the summary statistics for GDP per capita in 2021.
@@ -119,12 +117,51 @@ gdp_2021 |>
   summary()
 ```
 
+## 7.  Create a histogram of GDP Per Capita numbers for 2021 (you may wish to adjust the number of bins for your histogram).
 
-7.  Create a histogram of GDP Per Capita numbers for 2021 (you may wish to adjust the number of bins for your histogram).
+```{r}
+# Create a histogram
+gdp_2021 |> 
+  ggplot(
+    aes(x=GDP_Per_Capita) # Variables
+  ) +
+  geom_histogram(bins=10) # Graph type
+```
 
-8.  Find the top 5 counties and bottom 5 countries by GDP per capita in 2021.
+## 8.  Find the top 5 counties and bottom 5 countries by GDP per capita in 2021.
 
-9.  Now, return to the full dataset, `gdp_df`. Pivot the data for 1990 and 2021 (using `pivot_wider()` function) so that each row corresponds to a country, each column corresponds to a year, and the values in the table give the GDP_Per_Capita amount. Drop any rows that are missing values for either 1990 or 2021. Save the result to a tibble named `gdp_pivoted`.
+```{r}
+# Sort the tibble by GDP_Per_Capita
+gdp_2021 <- gdp_2021 |> 
+  arrange(GDP_Per_Capita)
+
+# Display the top 5 countries
+gdp_2021 |> 
+  head(5)
+
+#Display the bottom 5 countries
+gdp_2021 |> 
+  tail(5)
+```
+
+## 9.  Now, return to the full dataset, `gdp_df`. Pivot the data for 1990 and 2021 (using `pivot_wider()` function) so that each row corresponds to a country, each column corresponds to a year, and the values in the table give the GDP_Per_Capita amount. Drop any rows that are missing values for either 1990 or 2021. Save the result to a tibble named `gdp_pivoted`.
+
+```{r}
+# Get a widen tibble from gdp_df
+gdp_pivoted <- gdp_df |> 
+  filter(Year == c(1990, 2021)) |> # Filter year by 1990 and 2021
+  pivot_wider(
+    names_from = Year, # Use year values for variables
+    values_from = GDP_Per_Capita # Use GPD values for values
+  ) |> 
+  drop_na() # Drop any rows with n/a
+
+# Display a sample of gdp_pivoted
+gdp_pivoted |> 
+  slice_sample(n=2)
+```
+
+
 
 10. Create a new column in `gdp_pivoted` named `Percent_Change`. This column should contain the percent change in GDP_Per_Capita from 1990 to 2021. Hint: Percent change is calculated as 100\*(New Value - Old Value) / Old Value.
 
