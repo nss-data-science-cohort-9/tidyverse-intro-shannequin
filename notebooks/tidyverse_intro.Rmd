@@ -62,7 +62,14 @@ gdp_df |>
 
 ```{r}
 gdp_df |> 
-  group_by(Year)
+  group_by(Year) |> 
+  summarize(Observations=n())
+```
+
+```{r}
+gdp_df |> 
+  ggplot(aes(x=Year)) +
+  geom_bar()
 ```
 
 
