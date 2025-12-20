@@ -10,6 +10,7 @@ In this project, you'll be redoing the UN Data project using the tidyverse libra
 Create a new R Notebook to complete this exercise.
 
 ```{r}
+library(dplyr)
 library(tidyverse)
 ```
 
@@ -22,7 +23,7 @@ After reading it in, inspect the first 10 rows and then inspect the last 10 rows
 *Pipe: CTRL + SHIFT + M*
 
 ```{r}
-# Read data
+# Read the data
 gdp_df <- read_csv("../data/gdp_per_capita.csv")
 ```
 
@@ -42,9 +43,10 @@ gdp_df |>
 
 ```{r}
 gdp_df <- gdp_df |> 
-  select(!'Value Footnotes') |> 
-  rename(Country=`Country or Area`, GDP_Per_Capita=Value)
+  select(!'Value Footnotes') |> # Select all the variables except Value Footnotes
+  rename(Country=`Country or Area`, GDP_Per_Capita=Value) # Rename the variables
 
+# Display the formatted table
 gdp_df |> 
   head(1)
 ```
@@ -54,30 +56,69 @@ gdp_df |>
 How many observations are there per year? Make a plot to view the number of observations per year.
 
 ```{r}
-# Display unique years
+# Display the unique years
 gdp_df |> 
-  distinct(Year) |> 
-  arrange(Year)
+  distinct(Year) |> # Get the unique years
+  arrange(Year) # Sort by year ascending
 ```
 
 ```{r}
+# Display the number of observations per year
 gdp_df |> 
-  group_by(Year) |> 
-  summarize(Observations=n())
+  group_by(Year) |> # Group by the year
+  summarize(Observations=n()) # Get the number of observations
 ```
 
 ```{r}
+# Plot the number of observations per year
 gdp_df |> 
-  ggplot(aes(x=Year)) +
-  geom_bar()
+  ggplot(aes(x=Year)) + # Plot the years
+  geom_bar() + # Use a bar graph
+  labs(
+    title="Number of Observations Per Year", # Set the graph title
+    y="Observations" # Set the graph y axis label
+  )
 ```
-
 
 ## 4. How many countries are represented in this dataset? Which countries have the fewest observations?
 
-5.  Create a new tibble by subsetting `gdp_df` to just the year 2021. Call this new tibble `gdp_2021`.
+```{r}
+# Get the number of countries
+total_countries <- gdp_df |> 
+  distinct(Country) |> # Get the unique countries
+  count() |> # Count the number of countries
+  pull() # Get the vector
 
-6.  Use `summary()` to find the summary statistics for GDP per capita in 2021.
+total_countries # Display the total country count
+```
+
+```{r}
+
+gdp_df |> 
+  group_by(Country) |> # Group by the countries
+  summarize(Observations=n() / total_countries) |> # Convert the country count to a percentage
+  filter(Observations <= 0.1) # Filter by the bottom 10% of observation counts
+```
+
+## 5.  Create a new tibble by subsetting `gdp_df` to just the year 2021. Call this new tibble `gdp_2021`.
+
+```{r}
+# Create a new tibble with the GDP data from 2021
+gdp_2021 <- gdp_df |> 
+  filter(Year==2021)
+
+# Display the new tibble
+gdp_2021 |> 
+  head(1)
+```
+
+## 6.  Use `summary()` to find the summary statistics for GDP per capita in 2021.
+
+```{r}
+gdp_2021 |> 
+  summary()
+```
+
 
 7.  Create a histogram of GDP Per Capita numbers for 2021 (you may wish to adjust the number of bins for your histogram).
 
