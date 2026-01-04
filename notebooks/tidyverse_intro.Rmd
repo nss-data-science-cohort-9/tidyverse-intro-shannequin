@@ -23,7 +23,7 @@ After reading it in, inspect the first 10 rows and then inspect the last 10 rows
 *Pipe: CTRL + SHIFT + M*
 
 ```{r}
-# Read the data
+# Read the data from a csv file
 gdp_df <- read_csv("../data/gdp_per_capita.csv")
 ```
 
@@ -149,29 +149,88 @@ gdp_2021 |>
 ```{r}
 # Get a widen tibble from gdp_df
 gdp_pivoted <- gdp_df |> 
-  filter(Year == c(1990, 2021)) |> # Filter year by 1990 and 2021
+  mutate(Year = as.character(Year)) |> # Convert int to char
+  filter(Year == "1990" | Year == "2021") |> # Filter year by 1990 and 2021
   pivot_wider(
     names_from = Year, # Use year values for variables
-    values_from = GDP_Per_Capita # Use GPD values for values
-  ) |> 
+    values_from = GDP_Per_Capita, # Use GPD values for values
+  ) |>
   drop_na() # Drop any rows with n/a
 
 # Display a sample of gdp_pivoted
-gdp_pivoted |> 
+gdp_pivoted |>
   slice_sample(n=2)
 ```
 
+## 10. Create a new column in `gdp_pivoted` named `Percent_Change`. This column should contain the percent change in GDP_Per_Capita from 1990 to 2021. Hint: Percent change is calculated as 100\*(New Value - Old Value) / Old Value.
 
+```{r}
+# Calculate percent change as new column
+gdp_pivoted <- gdp_pivoted |> 
+  mutate(Percent_Change = 100 * (`2021` - `1990`) / `1990`) 
 
-10. Create a new column in `gdp_pivoted` named `Percent_Change`. This column should contain the percent change in GDP_Per_Capita from 1990 to 2021. Hint: Percent change is calculated as 100\*(New Value - Old Value) / Old Value.
+# Display a sample of gdp_pivoted
+gdp_pivoted |> 
+  slice_sample(n=5)
+```
 
-11. How many countries experienced a negative percent change in GDP per capita from 1990 to 2021?
+## 11. How many countries experienced a negative percent change in GDP per capita from 1990 to 2021?
 
-12. Which country had the highest % change in GDP per capita? Which country had the second highest % change? Create a line plot showing these country's GDP per capita for all years for which you have data. Put both line charts on the same plot.
+```{r}
+# Filter by Percent_Change less than 100
+negative_percent_change_count <- gdp_pivoted |> 
+  filter(Percent_Change < 100) |> 
+  count() |> 
+  pull()
 
-13. Read in continents.csv contained in the `data` folder into a new tibble called `continents`. We will be using this tibble to add a new column to our dataset.
+negative_percent_change_count
+```
+
+## 12. Which country had the highest % change in GDP per capita? Which country had the second highest % change? Create a line plot showing these country's GDP per capita for all years for which you have data. Put both line charts on the same plot.
+
+```{r}
+# Create a tibble with the top 2 countries by highest percent change
+top_2_percent_change <- gdp_pivoted |> 
+  arrange(desc(Percent_Change)) |> 
+  head(2)
+
+top_2_percent_change
+```
+
+```{r}
+# Pull just the list of countries
+top_2_list <- top_2_percent_change['Country'] |> 
+  pull()
+
+# Create a line graph of the 2 countries' GDP per capita
+gdp_df |> 
+  filter(Country %in% top_2_list) |> # Filter by the 2 required countries
+  arrange(Year) |> # Sorty by year
+  ggplot(aes(x = Year, y = GDP_Per_Capita, color = Country)) + # Set plot details
+  geom_line() # Create a line graph
+```
+
+## 13. Read in continents.csv contained in the `data` folder into a new tibble called `continents`. We will be using this tibble to add a new column to our dataset.
+
+```{r}
+# Read the data from a csv file
+continents <- read_csv("../data/continents.csv")
+
+# Display a sample of the tibble
+continents |> 
+  slice_sample(n=5)
+```
 
 14. Merge gdp_df and continents. Keep only the countries that appear in both data frames. Save the result back to gdp_df.
+
+```{r}
+# Merge tibbles
+gdp_df <- merge(x = gdp_df, y = continents)
+
+# Display sample of tibble
+gdp_df |> 
+  slice_sample(n=5)
+```
 
 15. Determine the number of countries per continent. Create a bar chart showing this.
 
