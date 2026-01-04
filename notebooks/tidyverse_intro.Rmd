@@ -234,7 +234,32 @@ gdp_df |>
 
 15. Determine the number of countries per continent. Create a bar chart showing this.
 
+```{r}
+# Get number of countries per continent
+gdp_df |> 
+  group_by(Continent) |> # Group by continent
+  distinct(Country) |> # Filter by unique countries
+  count() # Count number of rows
+```
+
+```{r}
+# Graph number of countries by continent
+gdp_df |> 
+  group_by(Continent) |> # Group by continent
+  distinct(Country) |> # Filter by unique countries
+  ggplot(aes(x = Continent)) + # Set the plot details
+  geom_bar() # Create the bar graph
+```
+
 16. Create a boxplot showing GDP per capita in 2021 split out by continent. What do you notice?
+
+```{r}
+gdp_df |> 
+  group_by(Continent) |> 
+  summarize(Avg_GDP = mean(GDP_Per_Capita)) |> 
+  arrange(desc(Avg_GDP))
+```
+
 
 17. Read life_expectancy.csv into a tibble named life_expectancy. Do not modify the csv file in order to read this data in.
 
