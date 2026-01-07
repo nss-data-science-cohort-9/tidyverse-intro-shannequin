@@ -221,7 +221,7 @@ continents |>
   slice_sample(n=5)
 ```
 
-14. Merge gdp_df and continents. Keep only the countries that appear in both data frames. Save the result back to gdp_df.
+## 14. Merge gdp_df and continents. Keep only the countries that appear in both data frames. Save the result back to gdp_df.
 
 ```{r}
 # Merge tibbles
@@ -232,7 +232,7 @@ gdp_df |>
   slice_sample(n=5)
 ```
 
-15. Determine the number of countries per continent. Create a bar chart showing this.
+## 15. Determine the number of countries per continent. Create a bar chart showing this.
 
 ```{r}
 # Get number of countries per continent
@@ -251,21 +251,58 @@ gdp_df |>
   geom_bar() # Create the bar graph
 ```
 
-16. Create a boxplot showing GDP per capita in 2021 split out by continent. What do you notice?
+## 16. Create a boxplot showing GDP per capita in 2021 split out by continent. What do you notice?
 
 ```{r}
 gdp_df |> 
   group_by(Continent) |> 
-  summarize(Avg_GDP = mean(GDP_Per_Capita)) |> 
-  arrange(desc(Avg_GDP))
+  ggplot(aes(x = Continent, y = GDP_Per_Capita)) +
+  geom_boxplot()
 ```
 
+## 17. Read life_expectancy.csv into a tibble named life_expectancy. Do not modify the csv file in order to read this data in.
 
-17. Read life_expectancy.csv into a tibble named life_expectancy. Do not modify the csv file in order to read this data in.
+```{r}
+# Read csv file skipping the first 3 lines
+life_expectancy <- read_csv("../data/life_expectancy.csv", skip = 3)
 
-18. Drop the Country Code, Indicator Name, and Indicator Code columns. Then use `pivot_longer` to convert your data from wide to long. That is, instead of having one row per country and multiple colums per year, we want to have multiple rows per country and a single column for year. After melting, rename the columns to `Country`, `Year`, and `Life_Expectancy`.
+# Display sample
+life_expectancy |> 
+  slice_sample(n = 2)
+```
 
-19. What was the first country with a life expectancy to exceed 80?
+## 18. Drop the Country Code, Indicator Name, and Indicator Code columns. Then use `pivot_longer` to convert your data from wide to long. That is, instead of having one row per country and multiple colums per year, we want to have multiple rows per country and a single column for year. After melting, rename the columns to `Country`, `Year`, and `Life_Expectancy`.
+
+```{r}
+# Drop unnecessary columns
+life_expectancy <- life_expectancy |> 
+  select(!`Country Code`:`Indicator Code`)
+
+# Display sample
+life_expectancy |> 
+  slice_sample(n = 2)
+```
+
+```{r}
+# Pivot longer
+life_expectancy <- life_expectancy |> 
+  pivot_longer(!`Country Name`, names_to = "Year", values_to = "Life_Expectancy") |> 
+  rename(Country = `Country Name`)
+
+# Display sample
+life_expectancy |> 
+  slice_sample(n = 2)
+```
+
+## 19. What was the first country with a life expectancy to exceed 80?
+
+```{r}
+life_expectancy |> 
+  filter(Life_Expectancy > 80.0) |> 
+  arrange(Year) |> 
+  head(1)
+```
+
 
 20. Merge `gdp_df` and `life_expectancy`, keeping all countries and years that appear in both tibbles. Save the result to a new tibble named `gdp_le`. If you get any errors in doing this, read them carefully and correct them. Look at the first five rows of your new data frame to confirm it merged correctly. Also, check the last five rows to make sure the data is clean and as expected.
 
