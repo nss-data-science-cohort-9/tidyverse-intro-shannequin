@@ -303,15 +303,95 @@ life_expectancy |>
   head(1)
 ```
 
+## 20. Merge `gdp_df` and `life_expectancy`, keeping all countries and years that appear in both tibbles. Save the result to a new tibble named `gdp_le`. If you get any errors in doing this, read them carefully and correct them. Look at the first five rows of your new data frame to confirm it merged correctly. Also, check the last five rows to make sure the data is clean and as expected.
 
-20. Merge `gdp_df` and `life_expectancy`, keeping all countries and years that appear in both tibbles. Save the result to a new tibble named `gdp_le`. If you get any errors in doing this, read them carefully and correct them. Look at the first five rows of your new data frame to confirm it merged correctly. Also, check the last five rows to make sure the data is clean and as expected.
+```{r}
+# Merge tibbles
+gdp_le <- merge(x = gdp_df, y = life_expectancy)
+
+# Display top five
+gdp_le |> 
+  head(5)
+```
+
+```{r}
+# Display bottom five
+gdp_le |> 
+  tail(5)
+```
 
 21. Create a new tibble, named `gdp_le_2021` by extracting data for the year 2021 from `gdp_le`. How many countries have a life expectancy of at least 80 in 2021?
 
-22. Find the countries that had the top 3 largest GDP per capita figures for 2021. Create a plot showing the change in life expectancy over time for these three countries. This plot should be faceted so that each country is contained in its own figure.
+```{r}
+# Filter by year 2021
+gdp_le_2021 <- gdp_le |> 
+  filter(Year == 2021)
 
-23. Create a scatter plot of Life Expectancy vs GDP per Capita for the year 2021. What do you notice?
+# Filter life expectancy by 80+
+gdp_le_2021 |> 
+  filter(Life_Expectancy >= 80.0) |> 
+  count()
+```
 
-24. Find the correlation between Life Expectancy and GDP per Capita for the year 2021. What is the meaning of this number?
+## 22. Find the countries that had the top 3 largest GDP per capita figures for 2021. Create a plot showing the change in life expectancy over time for these three countries. This plot should be faceted so that each country is contained in its own figure.
 
-25. Add a column to `gdp_le_2021` and calculate the logarithm of GDP per capita. Find the correlation between the log of GDP per capita and life expectancy. How does this compare to the calculation in the previous part? Look at a scatter plot to see if the result of this calculation makes sense.
+```{r}
+# Filter top 3 countries for GDP per capita
+top_gdp_2021 <- gdp_le_2021 |> 
+  arrange(desc(GDP_Per_Capita)) |> 
+  head(3)
+
+# Display tibble
+top_gdp_2021
+```
+
+```{r}
+# Create a list of the top 3 countries for GDP
+top_gdp_2021_country_list <- as.list(top_gdp_2021$Country)
+
+# Display list
+top_gdp_2021_country_list
+```
+
+```{r}
+# Create facet grid
+gdp_le |> 
+  filter(Country %in% top_gdp_2021_country_list) |> # Filter by top 3 countries by GDP
+  group_by(Country) |> # Group by country
+  ggplot(aes(x = Year, y = Life_Expectancy)) + # Set the plot data
+  geom_point(aes(color = Country)) + # Create the plot
+  facet_wrap(~Country) # Format as facet grid
+```
+
+## 23. Create a scatter plot of Life Expectancy vs GDP per Capita for the year 2021. What do you notice?
+
+```{r}
+# Graph a scatterplot
+gdp_le_2021 |> 
+  ggplot(aes(x = Life_Expectancy, y = GDP_Per_Capita)) + # Set plot data
+  geom_point() # Create scatterplot
+```
+
+## 24. Find the correlation between Life Expectancy and GDP per Capita for the year 2021. What is the meaning of this number?
+
+```{r}
+# Calculate correlation
+cor(x = gdp_le_2021['Life_Expectancy'], y = gdp_le_2021['GDP_Per_Capita'], method = "pearson", use = "na.or.complete")
+```
+
+## 25. Add a column to `gdp_le_2021` and calculate the logarithm of GDP per capita. Find the correlation between the log of GDP per capita and life expectancy. How does this compare to the calculation in the previous part? Look at a scatter plot to see if the result of this calculation makes sense.
+
+```{r}
+# Add column for log of GDP
+gdp_le_2021 <- gdp_le_2021 |> 
+  mutate(Log_GDP = log(GDP_Per_Capita))
+
+# Display sample
+gdp_le_2021 |> 
+  slice_sample(n = 2)
+```
+
+```{r}
+# Calculate correlation
+cor(x = gdp_le_2021['Life_Expectancy'], y = gdp_le_2021['Log_GDP'], method = "pearson", use = "na.or.complete")
+```
